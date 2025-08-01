@@ -5,7 +5,7 @@
     "lib": ["ES2020"],
     "declaration": true,
     "declarationDir": "lib",
-    "outDir": "lib",
+    "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true
