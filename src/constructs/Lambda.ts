@@ -13,6 +13,7 @@ import * as lambdaNodejs from "aws-cdk-lib/aws-lambda-nodejs";
 interface LambdaFunctionProps {
   lambdaName: string;
   entryPath: string;
+  environment?: Record<string, string>;
 }
 
 export class LambdaFunction extends Construct {
@@ -98,6 +99,7 @@ export class LambdaFunction extends Construct {
         DB_SECRET_NAME: dbSecret.secretName,
         DB_HOST: dbHost,
         DB_NAME: "AdultnaDb",
+        ...props.environment,
       },
       timeout: Duration.seconds(60),
       bundling: { minify: true },
