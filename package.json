@@ -1,0 +1,32 @@
+{
+  "name": "adultna-lib-cdk-constructs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.132.0",
+    "constructs": "^10.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IT-26211-Group-1/adultna-lib-cdk-constructs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IT-26211-Group-1/adultna-lib-cdk-constructs/issues"
+  },
+  "homepage": "https://github.com/IT-26211-Group-1/adultna-lib-cdk-constructs#readme"
+}
