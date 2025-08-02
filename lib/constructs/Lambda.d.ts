@@ -4,6 +4,7 @@ import * as lambdaNodejs from "aws-cdk-lib/aws-lambda-nodejs";
 interface LambdaFunctionProps {
     lambdaName: string;
     entryPath: string;
+    environment?: Record<string, string>;
 }
 export declare class LambdaFunction extends Construct {
     readonly lambdaFn: lambdaNodejs.NodejsFunction;

@@ -82,6 +82,7 @@ class LambdaFunction extends constructs_1.Construct {
                 DB_SECRET_NAME: dbSecret.secretName,
                 DB_HOST: dbHost,
                 DB_NAME: "AdultnaDb",
+                ...props.environment,
             },
             timeout: aws_cdk_lib_1.Duration.seconds(60),
             bundling: { minify: true },
