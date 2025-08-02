@@ -35,7 +35,6 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LambdaFunction = void 0;
 const aws_cdk_lib_1 = require("aws-cdk-lib");
-const path = __importStar(require("path"));
 const constructs_1 = require("constructs");
 const lambda = __importStar(require("aws-cdk-lib/aws-lambda"));
 const lambdaNodejs = __importStar(require("aws-cdk-lib/aws-lambda-nodejs"));
@@ -72,7 +71,7 @@ class LambdaFunction extends constructs_1.Construct {
         });
         this.lambdaFn = new lambdaNodejs.NodejsFunction(this, props.lambdaName, {
             runtime: lambda.Runtime.NODEJS_22_X,
-            entry: path.join(__dirname, props.entryPath),
+            entry: props.entryPath,
             handler: "handler",
             vpc,
             vpcSubnets: { subnetType: aws_cdk_lib_1.aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },

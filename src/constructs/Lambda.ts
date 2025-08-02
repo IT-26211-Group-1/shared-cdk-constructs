@@ -89,7 +89,7 @@ export class LambdaFunction extends Construct {
 
     this.lambdaFn = new lambdaNodejs.NodejsFunction(this, props.lambdaName, {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: path.join(__dirname, props.entryPath),
+      entry: props.entryPath,
       handler: "handler",
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
