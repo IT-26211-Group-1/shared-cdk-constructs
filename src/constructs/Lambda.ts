@@ -102,7 +102,7 @@ export class LambdaFunction extends Construct {
         ...props.environment,
       },
       timeout: Duration.seconds(60),
-      bundling: { minify: true },
+      bundling: { minify: true, forceDockerBundling: false },
     });
 
     dbSecret.grantRead(this.lambdaFn);
