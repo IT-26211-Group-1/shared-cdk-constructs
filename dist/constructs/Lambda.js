@@ -37,29 +37,36 @@ exports.LambdaFunction = void 0;
 const aws_cdk_lib_1 = require("aws-cdk-lib");
 const constructs_1 = require("constructs");
 const lambda = __importStar(require("aws-cdk-lib/aws-lambda"));
-const lambdaNodejs = __importStar(require("aws-cdk-lib/aws-lambda-nodejs"));
+const aws_lambda_nodejs_1 = require("aws-cdk-lib/aws-lambda-nodejs");
 class LambdaFunction extends constructs_1.Construct {
     constructor(scope, id, props) {
         super(scope, id);
-        const lambdaExecutionRole = new aws_cdk_lib_1.aws_iam.Role(this, `${props.lambdaName}Role`, {
-            assumedBy: new aws_cdk_lib_1.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
-            managedPolicies: [
-                aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
-            ],
-        });
-        if (props.vpc) {
-            lambdaExecutionRole.addManagedPolicy(aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVPCAccessExecutionRole"));
+        const role = props.role ??
+            new aws_cdk_lib_1.aws_iam.Role(this, `${props.lambdaName}Role`, {
+                assumedBy: new aws_cdk_lib_1.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
+                managedPolicies: [
+                    aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
+                    aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVPCAccessExecutionRole"),
+                ],
+            });
+        if (props.kmsKey) {
+            props.kmsKey.grantDecrypt(role);
         }
-        this.lambdaFn = new lambdaNodejs.NodejsFunction(this, props.lambdaName, {
+        this.lambdaFn = new aws_lambda_nodejs_1.NodejsFunction(this, props.lambdaName, {
+            functionName: props.lambdaName,
             runtime: lambda.Runtime.NODEJS_22_X,
             entry: props.entryPath,
             handler: "handler",
-            timeout: aws_cdk_lib_1.Duration.seconds(60),
-            bundling: { minify: true, forceDockerBundling: false },
+            timeout: props.timeout ?? aws_cdk_lib_1.Duration.seconds(60),
+            bundling: {
+                minify: true,
+                forceDockerBundling: false,
+                ...props.bundling,
+            },
             vpc: props.vpc,
-            vpcSubnets: { subnetType: aws_cdk_lib_1.aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
+            vpcSubnets: props.vpcSubnets,
             securityGroups: props.securityGroups,
-            role: lambdaExecutionRole,
+            role,
             environment: props.environment,
         });
     }

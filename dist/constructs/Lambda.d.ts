@@ -1,16 +1,21 @@
-import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import { Duration, aws_ec2 as ec2, aws_iam as iam } from "aws-cdk-lib";
+import { IKey } from "aws-cdk-lib/aws-kms";
 import { Construct } from "constructs";
-import * as lambdaNodejs from "aws-cdk-lib/aws-lambda-nodejs";
+import { NodejsFunction, NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
 interface LambdaFunctionProps {
     lambdaName: string;
     entryPath: string;
     environment?: Record<string, string>;
-    vpc?: ec2.IVpc;
-    vpcSubnets?: ec2.SubnetSelection;
-    securityGroups?: ec2.ISecurityGroup[];
+    vpc: ec2.IVpc;
+    securityGroups: ec2.ISecurityGroup[];
+    vpcSubnets: ec2.SubnetSelection;
+    role?: iam.IRole;
+    bundling?: NodejsFunctionProps["bundling"];
+    timeout?: Duration;
+    kmsKey?: IKey;
 }
 export declare class LambdaFunction extends Construct {
-    readonly lambdaFn: lambdaNodejs.NodejsFunction;
+    readonly lambdaFn: NodejsFunction;
     constructor(scope: Construct, id: string, props: LambdaFunctionProps);
 }
 export {};

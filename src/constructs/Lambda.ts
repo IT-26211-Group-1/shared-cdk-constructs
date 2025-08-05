@@ -5,53 +5,65 @@ import {
   aws_ssm as ssm,
   aws_secretsmanager as secretsmanager,
 } from "aws-cdk-lib";
-import * as path from "path";
+import { IKey } from "aws-cdk-lib/aws-kms";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as lambdaNodejs from "aws-cdk-lib/aws-lambda-nodejs";
+import {
+  NodejsFunction,
+  NodejsFunctionProps,
+} from "aws-cdk-lib/aws-lambda-nodejs";
 
 interface LambdaFunctionProps {
   lambdaName: string;
   entryPath: string;
   environment?: Record<string, string>;
-  vpc?: ec2.IVpc;
-  vpcSubnets?: ec2.SubnetSelection;
-  securityGroups?: ec2.ISecurityGroup[];
+  vpc: ec2.IVpc;
+  securityGroups: ec2.ISecurityGroup[];
+  vpcSubnets: ec2.SubnetSelection;
+  role?: iam.IRole;
+  bundling?: NodejsFunctionProps["bundling"];
+  timeout?: Duration;
+  kmsKey?: IKey;
 }
-
 export class LambdaFunction extends Construct {
-  public readonly lambdaFn: lambdaNodejs.NodejsFunction;
+  public readonly lambdaFn: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaFunctionProps) {
     super(scope, id);
 
-    const lambdaExecutionRole = new iam.Role(this, `${props.lambdaName}Role`, {
-      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AWSLambdaBasicExecutionRole"
-        ),
-      ],
-    });
+    const role =
+      props.role ??
+      new iam.Role(this, `${props.lambdaName}Role`, {
+        assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+        managedPolicies: [
+          iam.ManagedPolicy.fromAwsManagedPolicyName(
+            "service-role/AWSLambdaBasicExecutionRole"
+          ),
+          iam.ManagedPolicy.fromAwsManagedPolicyName(
+            "service-role/AWSLambdaVPCAccessExecutionRole"
+          ),
+        ],
+      });
 
-    if (props.vpc) {
-      lambdaExecutionRole.addManagedPolicy(
-        iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AWSLambdaVPCAccessExecutionRole"
-        )
-      );
+    if (props.kmsKey) {
+      props.kmsKey.grantDecrypt(role);
     }
 
-    this.lambdaFn = new lambdaNodejs.NodejsFunction(this, props.lambdaName, {
+    this.lambdaFn = new NodejsFunction(this, props.lambdaName, {
+      functionName: props.lambdaName,
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: props.entryPath,
       handler: "handler",
-      timeout: Duration.seconds(60),
-      bundling: { minify: true, forceDockerBundling: false },
+      timeout: props.timeout ?? Duration.seconds(60),
+      bundling: {
+        minify: true,
+        forceDockerBundling: false,
+        ...props.bundling,
+      },
       vpc: props.vpc,
-      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      vpcSubnets: props.vpcSubnets,
       securityGroups: props.securityGroups,
-      role: lambdaExecutionRole,
+      role,
       environment: props.environment,
     });
   }
