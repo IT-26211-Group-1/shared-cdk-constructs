@@ -5,10 +5,12 @@ interface LambdaFunctionProps {
     lambdaName: string;
     entryPath: string;
     environment?: Record<string, string>;
+    vpc?: ec2.IVpc;
+    vpcSubnets?: ec2.SubnetSelection;
+    securityGroups?: ec2.ISecurityGroup[];
 }
 export declare class LambdaFunction extends Construct {
     readonly lambdaFn: lambdaNodejs.NodejsFunction;
-    readonly lambdaSecurityGroup: ec2.SecurityGroup;
     constructor(scope: Construct, id: string, props: LambdaFunctionProps);
 }
 export {};

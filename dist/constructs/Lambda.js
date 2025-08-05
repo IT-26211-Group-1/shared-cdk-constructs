@@ -41,52 +41,27 @@ const lambdaNodejs = __importStar(require("aws-cdk-lib/aws-lambda-nodejs"));
 class LambdaFunction extends constructs_1.Construct {
     constructor(scope, id, props) {
         super(scope, id);
-        const vpc = aws_cdk_lib_1.aws_ec2.Vpc.fromLookup(this, "AdultnaVpc", {
-            tags: {
-                Name: "AdultnaVpc",
-            },
-        });
-        const dbSecurityGroupId = aws_cdk_lib_1.aws_ssm.StringParameter.valueForStringParameter(this, "/adultna/database/db-security-group-id");
-        const dbSecurityGroup = aws_cdk_lib_1.aws_ec2.SecurityGroup.fromSecurityGroupId(this, "DbSecurityGroup", dbSecurityGroupId);
-        this.lambdaSecurityGroup = new aws_cdk_lib_1.aws_ec2.SecurityGroup(this, "LambdaSecurityGroup", {
-            vpc,
-            description: "Security group for Lambda to access RDS",
-            allowAllOutbound: true,
-        });
-        dbSecurityGroup.addIngressRule(this.lambdaSecurityGroup, aws_cdk_lib_1.aws_ec2.Port.tcp(3306), "Allow Lambda access to MySQL");
-        // Get DB credentials secret ARN
-        const dbSecretArn = aws_cdk_lib_1.aws_ssm.StringParameter.valueForStringParameter(this, "/adultna/secrets/db-credentials-arn");
-        const dbSecret = aws_cdk_lib_1.aws_secretsmanager.Secret.fromSecretCompleteArn(this, "DbSecret", dbSecretArn);
-        // Get DB hostname
-        const dbHost = aws_cdk_lib_1.aws_ssm.StringParameter.valueForStringParameter(this, "/adultna/database/endpoint");
-        // IAM Role for Lambda
-        const lambdaExecutionRole = new aws_cdk_lib_1.aws_iam.Role(this, "RegisterUserLambdaRole", {
+        const lambdaExecutionRole = new aws_cdk_lib_1.aws_iam.Role(this, `${props.lambdaName}Role`, {
             assumedBy: new aws_cdk_lib_1.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
             managedPolicies: [
                 aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
-                aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMReadOnlyAccess"),
-                aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("SecretsManagerReadWrite"),
-                aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVPCAccessExecutionRole"),
             ],
         });
+        if (props.vpc) {
+            lambdaExecutionRole.addManagedPolicy(aws_cdk_lib_1.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVPCAccessExecutionRole"));
+        }
         this.lambdaFn = new lambdaNodejs.NodejsFunction(this, props.lambdaName, {
             runtime: lambda.Runtime.NODEJS_22_X,
             entry: props.entryPath,
             handler: "handler",
-            vpc,
-            vpcSubnets: { subnetType: aws_cdk_lib_1.aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
-            securityGroups: [this.lambdaSecurityGroup],
-            role: lambdaExecutionRole,
-            environment: {
-                DB_SECRET_NAME: dbSecret.secretName,
-                DB_HOST: dbHost,
-                DB_NAME: "AdultnaDb",
-                ...props.environment,
-            },
             timeout: aws_cdk_lib_1.Duration.seconds(60),
-            bundling: { minify: true },
+            bundling: { minify: true, forceDockerBundling: false },
+            vpc: props.vpc,
+            vpcSubnets: { subnetType: aws_cdk_lib_1.aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
+            securityGroups: props.securityGroups,
+            role: lambdaExecutionRole,
+            environment: props.environment,
         });
-        dbSecret.grantRead(this.lambdaFn);
     }
 }
 exports.LambdaFunction = LambdaFunction;
