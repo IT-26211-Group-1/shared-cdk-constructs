@@ -18,18 +18,16 @@ interface LambdaFunctionProps {
   lambdaName: string;
   entryPath: string;
   environment?: Record<string, string>;
-  vpc: ec2.IVpc;
   securityGroups?: ec2.ISecurityGroup[];
   vpcSubnets: ec2.SubnetSelection;
   role?: iam.IRole;
   bundling?: NodejsFunctionProps["bundling"];
   timeout?: Duration;
   kmsKey?: IKey;
-  smParameterName?: string;
 }
 export class LambdaFunction extends Construct {
   public readonly lambdaFn: lambdaNodejs.NodejsFunction;
-  public readonly lambdaSecurityGroup: ec2.SecurityGroup;
+  public readonly securityGroup: ec2.SecurityGroup;
 
   constructor(scope: Construct, id: string, props: LambdaFunctionProps) {
     super(scope, id);
@@ -44,26 +42,11 @@ export class LambdaFunction extends Construct {
       this,
       "/adultna/database/db-security-group-id"
     );
+
     const dbSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
       this,
       "DbSecurityGroup",
       dbSecurityGroupId
-    );
-
-    this.lambdaSecurityGroup = new ec2.SecurityGroup(
-      this,
-      "LambdaSecurityGroup",
-      {
-        vpc,
-        description: "Security group for Lambda to access RDS",
-        allowAllOutbound: true,
-      }
-    );
-
-    dbSecurityGroup.addIngressRule(
-      this.lambdaSecurityGroup,
-      ec2.Port.tcp(3306),
-      "Allow Lambda access to MySQL"
     );
 
     // Get DB credentials secret ARN
@@ -83,13 +66,17 @@ export class LambdaFunction extends Construct {
       "/adultna/database/endpoint"
     );
 
-    const lambdaSG =
-      props.securityGroups?.[0] ??
-      new ec2.SecurityGroup(this, "LambdaSecurityGroup", {
-        vpc: props.vpc,
-        description: `SG for ${props.lambdaName}`,
-        allowAllOutbound: true,
-      });
+    this.securityGroup = new ec2.SecurityGroup(this, "LambdaSecurityGroup", {
+      vpc,
+      description: `Security Group for ${props.lambdaName}`,
+      allowAllOutbound: true,
+    });
+
+    dbSecurityGroup.addIngressRule(
+      this.securityGroup,
+      ec2.Port.tcp(3306),
+      "Allow Lambda to access MySQL"
+    );
 
     const lambdaRole =
       props.role ??
@@ -116,9 +103,9 @@ export class LambdaFunction extends Construct {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: props.entryPath,
       handler: "handler",
-      vpc: props.vpc,
+      vpc: vpc,
       vpcSubnets: props.vpcSubnets,
-      securityGroups: [lambdaSG],
+      securityGroups: [this.securityGroup],
       role: lambdaRole,
       timeout: props.timeout ?? Duration.seconds(60),
       bundling: props.bundling ?? { minify: true },

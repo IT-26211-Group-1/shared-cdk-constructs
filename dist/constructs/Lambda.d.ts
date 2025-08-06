@@ -6,18 +6,16 @@ interface LambdaFunctionProps {
     lambdaName: string;
     entryPath: string;
     environment?: Record<string, string>;
-    vpc: ec2.IVpc;
     securityGroups?: ec2.ISecurityGroup[];
     vpcSubnets: ec2.SubnetSelection;
     role?: iam.IRole;
     bundling?: NodejsFunctionProps["bundling"];
     timeout?: Duration;
     kmsKey?: IKey;
-    smParameterName?: string;
 }
 export declare class LambdaFunction extends Construct {
     readonly lambdaFn: lambdaNodejs.NodejsFunction;
-    readonly lambdaSecurityGroup: ec2.SecurityGroup;
+    readonly securityGroup: ec2.SecurityGroup;
     constructor(scope: Construct, id: string, props: LambdaFunctionProps);
 }
 export {};
