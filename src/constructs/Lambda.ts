@@ -107,7 +107,7 @@ export class LambdaFunction extends Construct {
       timeout: props.timeout ?? Duration.seconds(60),
       bundling: props.bundling ?? { minify: true },
       environment: {
-        DB_SECRET_NAME: dbSecret.secretName,
+        DB_SECRET_NAME: "adultna-db-credentials",
         DB_HOST: dbHost,
         DB_NAME: "AdultnaDb",
         ...props.environment,
