@@ -6,11 +6,7 @@ const constructs_1 = require("constructs");
 class LambdaFunction extends constructs_1.Construct {
     constructor(scope, id, props) {
         super(scope, id);
-        const vpc = aws_cdk_lib_1.aws_ec2.Vpc.fromLookup(this, "AdultnaVpc", {
-            tags: {
-                Name: "AdultnaVpc",
-            },
-        });
+        const vpc = props.vpc;
         const dbSecurityGroupId = aws_cdk_lib_1.aws_ssm.StringParameter.valueForStringParameter(this, "/adultna/database/db-security-group-id");
         const dbSecurityGroup = aws_cdk_lib_1.aws_ec2.SecurityGroup.fromSecurityGroupId(this, "DbSecurityGroup", dbSecurityGroupId);
         // Get DB credentials secret ARN

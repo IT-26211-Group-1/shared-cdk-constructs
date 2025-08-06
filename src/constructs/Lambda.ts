@@ -17,6 +17,7 @@ import {
 interface LambdaFunctionProps {
   lambdaName: string;
   entryPath: string;
+  vpc: ec2.IVpc;
   environment?: Record<string, string>;
   securityGroups?: ec2.ISecurityGroup[];
   vpcSubnets: ec2.SubnetSelection;
@@ -32,11 +33,7 @@ export class LambdaFunction extends Construct {
   constructor(scope: Construct, id: string, props: LambdaFunctionProps) {
     super(scope, id);
 
-    const vpc = ec2.Vpc.fromLookup(this, "AdultnaVpc", {
-      tags: {
-        Name: "AdultnaVpc",
-      },
-    });
+    const vpc = props.vpc;
 
     const dbSecurityGroupId = ssm.StringParameter.valueForStringParameter(
       this,

@@ -5,6 +5,7 @@ import { NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
 interface LambdaFunctionProps {
     lambdaName: string;
     entryPath: string;
+    vpc: ec2.IVpc;
     environment?: Record<string, string>;
     securityGroups?: ec2.ISecurityGroup[];
     vpcSubnets: ec2.SubnetSelection;
