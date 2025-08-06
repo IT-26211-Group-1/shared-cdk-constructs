@@ -20,7 +20,7 @@ class LambdaFunction extends constructs_1.Construct {
         });
         dbSecurityGroup.addIngressRule(this.lambdaSecurityGroup, aws_cdk_lib_1.aws_ec2.Port.tcp(3306), "Allow Lambda access to MySQL");
         // Get DB credentials secret ARN
-        const dbSecretArn = aws_cdk_lib_1.aws_ssm.StringParameter.valueForStringParameter(this, "/adultna/secrets/db-credentials-arn");
+        const dbSecretArn = aws_cdk_lib_1.aws_ssm.StringParameter.valueForStringParameter(this, "/adultna/secrets/db-credentials-secret-arn");
         const dbSecret = aws_cdk_lib_1.aws_secretsmanager.Secret.fromSecretCompleteArn(this, "DbSecret", dbSecretArn);
         // Get DB hostname
         const dbHost = aws_cdk_lib_1.aws_ssm.StringParameter.valueForStringParameter(this, "/adultna/database/endpoint");

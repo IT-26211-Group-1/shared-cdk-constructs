@@ -69,7 +69,7 @@ export class LambdaFunction extends Construct {
     // Get DB credentials secret ARN
     const dbSecretArn = ssm.StringParameter.valueForStringParameter(
       this,
-      "/adultna/secrets/db-credentials-arn"
+      "/adultna/secrets/db-credentials-secret-arn"
     );
     const dbSecret = secretsmanager.Secret.fromSecretCompleteArn(
       this,
