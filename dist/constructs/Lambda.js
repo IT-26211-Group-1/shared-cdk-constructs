@@ -45,12 +45,18 @@ class LambdaFunction extends constructs_1.Construct {
             timeout: props.timeout ?? aws_cdk_lib_1.Duration.seconds(60),
             bundling: props.bundling ?? { minify: true },
             environment: {
-                DB_SECRET_NAME: dbSecret.secretName,
+                DB_SECRET_NAME: "adultna-db-credentials",
                 DB_HOST: dbHost,
                 DB_NAME: "AdultnaDb",
                 ...props.environment,
             },
         });
+        passwordKey.addToResourcePolicy(new aws_cdk_lib_1.aws_iam.PolicyStatement({
+            sid: "AllowLambdaToUseKey",
+            actions: ["kms:Decrypt", "kms:Encrypt", "kms:GenerateDataKey"],
+            principals: [new aws_cdk_lib_1.aws_iam.ArnPrincipal(lambdaRole.roleArn)],
+            resources: ["*"],
+        }));
         dbSecret.grantRead(this.lambdaFn);
     }
 }
