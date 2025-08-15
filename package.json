@@ -1,6 +1,6 @@
 {
-  "name": "@it-26211-group-1/adultna-lib-cdk-constructs",
-  "version": "1.0.16",
+  "name": "@it-26211-group-1/shared-cdk-constructs",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
