@@ -1,2 +1,2 @@
-export * from "./constructs/Lambda";
-export * from "./constructs/ApiGateway";
+export { LambdaFunction } from "./constructs/Lambda";
+export { HttpApiGateway } from "./constructs/ApiGateway";

@@ -2,14 +2,17 @@
   "name": "@it-26211-group-1/shared-cdk-constructs",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "src",
+    "package.json"
+  ],
+  "main": "src/index.ts",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
